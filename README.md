@@ -12,7 +12,7 @@ service ambari-server restart
 #now install mvn and zeppelin service via Ambari add service wizard
 ```
 
-- install maven
+- Install maven
 ```
 mkdir /usr/share/maven
 cd /usr/share/maven
@@ -27,7 +27,7 @@ export M2=$M2_HOME/bin
 export PATH=$PATH:$M2
 ```
 
-- compile Phoenix from branch 4.x-HBase-0.98
+- Compile Phoenix from branch 4.x-HBase-0.98
 ```
 cd
 rm -rf phoenix
@@ -37,7 +37,7 @@ git checkout 4.x-HBase-0.98
 mvn package -DskipTests -Dhadoop.profile=2
 ```
 
-- compile simplymeasured phoenix-spark
+- Compile simplymeasured phoenix-spark
 ```
 cd
 rm -rf phoenix-spark
@@ -46,7 +46,7 @@ cd phoenix-spark
 mvn package -DskipTests
 ```
 
-- download spark 1.3.1
+- Download spark 1.3.1
 ```
 wget http://d3kbcqa49mib13.cloudfront.net/spark-1.3.1-bin-hadoop2.6.tgz
 tar -xzvf spark-1.3.1-bin-hadoop2.6.tgz
@@ -61,9 +61,9 @@ echo "export YARN_CONF_DIR=/etc/hadoop/conf" >> ~/.bashrc
 
 #### Setup Phoenix table and import data
 
-- remove Hbase maintenance mode
+- Remove Hbase maintenance mode
 
-- start HBASE
+- Start HBASE
 ```
 curl -u admin:admin -i -H 'X-Requested-By: ambari' -X PUT -d '{"RequestInfo": {"context" :"Start HBASE via REST"}, "Body": {"ServiceInfo": {"state": "STARTED"}}}' http://localhost:8080/api/v1/clusters/Sandbox/services/HBASE
 ```
@@ -76,7 +76,7 @@ wget http://trading.cheno.net/wp-content/uploads/2011/12/google_intraday.py
 python google_intraday.py > prices.csv
 ```
 
-- create sql file to create phoenix table
+- Create sql file to create phoenix table
 ```
 vi ~/prices.sql
 drop table if exists prices;
@@ -94,17 +94,17 @@ create table prices (
 );
 ```
 
-- create phoenix table and populate with csv data
+- Create phoenix table and populate with csv data
 ```
 /usr/hdp/2.2.4.2-2/phoenix/bin/psql.py sandbox.hortonworks.com:2181:/hbase-unsecure ~/prices.sql ~/prices.csv
 ```
 
-- connect to hbase via phoenix
+- Connect to hbase via phoenix
 ```
 /usr/hdp/2.2.4.2-2/phoenix/bin/sqlline.py sandbox.hortonworks.com:2181:/hbase-unsecure
 ```
 
-- run sample query
+- Run sample query
 ```
 select * from prices order by DATE, TIME limit 20;
 !q
