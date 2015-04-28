@@ -58,6 +58,13 @@ export YARN_CONF_DIR=/etc/hadoop/conf
 echo "export YARN_CONF_DIR=/etc/hadoop/conf" >> ~/.bashrc
 ```
 
+- Other
+```
+cp /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar.origali
+cp /root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar
+cp /root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-server.jar /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar
+```
+-Restart Hbase
 
 #### Setup Phoenix table and import data
 
@@ -101,6 +108,7 @@ create table prices (
 
 - Connect to hbase via phoenix
 ```
+/root/phoenix/bin/sqlline.py sandbox.hortonworks.com:2181:/hbase-unsecure
 /usr/hdp/2.2.4.2-2/phoenix/bin/sqlline.py sandbox.hortonworks.com:2181:/hbase-unsecure
 ```
 
@@ -145,6 +153,10 @@ java.lang.RuntimeException: java.lang.NullPointerException
 ```
 #start spark shell in yarn-client mode and pass in phoenix-spark and phoenix-assembly jars to classpath
 /root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars /root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar --conf hdp.version=2.2.4.2-2 
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars /usr/hdp/2.2.4.2-2/hbase/lib/hbase-protocol.jar,/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar --conf hdp.version=2.2.4.2-2
+
+#extract tgz from /root/phoenix under /usr before this
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars /usr/phoenix-4.4.0-HBase-0.98-SNAPSHOT/lib/hbase-protocol-0.98.12-hadoop2.jar,/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar --conf hdp.version=2.2.4.2-2
 
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
@@ -197,6 +209,10 @@ rdd.count()
 - Error seen:
 ```
 ERROR 2007 (INT09): Outdated jars. The following servers require an updated phoenix.jar to be put in the classpath of HBase: region=SYSTEM.CATALOG,,1430178920971.4f1ee8c72ac509956f0c4923dca5d8b7., hostname=sandbox.hortonworks.com,60020,1430178872563, seqNum=5
+
+Caused by: java.sql.SQLException: ERROR 2006 (INT08): Incompatible jars detected between client and server. Ensure that phoenix.jar is put on the classpath of HBase in every region server: org.apache.hadoop.hbase.protobuf.generated.ZooKeeperProtos$MetaRegionServer.hasState()Z
+
+
 ```
 
 #### Run through Zeppelin
