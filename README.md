@@ -199,6 +199,25 @@ rdd.count()
 ERROR 2007 (INT09): Outdated jars. The following servers require an updated phoenix.jar to be put in the classpath of HBase: region=SYSTEM.CATALOG,,1430178920971.4f1ee8c72ac509956f0c4923dca5d8b7., hostname=sandbox.hortonworks.com,60020,1430178872563, seqNum=5
 ```
 
+#### Run through Zeppelin
+
+- Edit ~/incubator-zeppelin/conf/zeppelin-env.sh as below and restart Zeppelin
+```
+export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk.x86_64
+export SPARK_YARN_JAR=hdfs:///tmp/.zeppelin/zeppelin-spark-0.5.0-SNAPSHOT.jar
+export MASTER=yarn-client
+#export SPARK_HOME=/usr/hdp/current/spark-client/
+export SPARK_HOME=/root/spark-1.3.1-bin-hadoop2.6/
+export HADOOP_CONF_DIR=/etc/hadoop/conf
+export ZEPPELIN_PID_DIR=/var/run/zeppelin-notebook
+export ZEPPELIN_JAVA_OPTS="-Dhdp.version=2.2.4.2-2 -Dspark.jars=/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar"
+export ZEPPELIN_LOG_DIR=/var/log/zeppelin
+```
+
+- Run same examples as above
+
+- Error seen:
+![Image](../master/screenshots/zeppelin-error.png?raw=true)
 
 #### Useful commands
 
