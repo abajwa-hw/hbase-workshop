@@ -31,7 +31,8 @@ curl -u admin:admin -i -H 'X-Requested-By: ambari' -X PUT -d '{"RequestInfo": {"
 - Run python code to generate stock price csv
 ```
 wget http://trading.cheno.net/wp-content/uploads/2011/12/google_intraday.py
-#make changes if needed
+#make changes to file
+sed -i "s/'spy',300,30/'AAPL',60,30/g" ~/google_intraday.py
 #generate csv of prices
 python google_intraday.py > prices.csv
 ```

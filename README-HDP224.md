@@ -38,7 +38,7 @@ git checkout 4.x-HBase-0.98
 mvn package -DskipTests -Dhadoop.profile=2
 ```
 
-- Compile simplymeasured phoenix-spark
+- NOT NEEDED ~Compile simplymeasured phoenix-spark~
 ```
 cd
 rm -rf phoenix-spark
@@ -62,10 +62,10 @@ export YARN_CONF_DIR=/etc/hadoop/conf
 echo "export YARN_CONF_DIR=$YARN_CONF_DIR" >> ~/.bashrc
 ```
 
-- Other
+- NOT NEEDED ~Other setup steps~ 
 ```
 cp /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar.origali
-cp /root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar
+#cp /root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar
 cp /root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-server.jar /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar
 ```
 - Restart Hbase
@@ -81,8 +81,11 @@ curl -u admin:admin -i -H 'X-Requested-By: ambari' -X PUT -d '{"RequestInfo": {"
 
 - Run python code to generate stock price csv
 ```
+cd
 wget http://trading.cheno.net/wp-content/uploads/2011/12/google_intraday.py
-#make changes if needed
+#make changes 
+sed -i "s/'spy',300,30/'AAPL',60,30/g" ~/google_intraday.py
+
 #generate csv of prices
 python google_intraday.py > prices.csv
 ```
@@ -134,19 +137,22 @@ select * from prices order by DATE, TIME limit 20;
 - Start spark shell
 
 ```
-unset HADOOP_CLASSPATH
-export SPARK_CLASSPATH=/etc/hbase/conf:/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-protocol.jar
+export SPARK_CLASSPATH=/etc/hbase/conf:/usr/hdp/2.2.4.2-2/hbase/lib/hbase-protocol.jar
+echo "export SPARK_CLASSPATH=/etc/hbase/conf:/usr/hdp/2.2.4.2-2/hbase/lib/hbase-protocol.jar" >> ~/.bashrc
 
 #start spark shell and pass in relevant jars to classpath
-#HDP 2.3 yarn-client mode
 
+#HDP 2.2.4 yarn-client mode
 /root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --conf hdp.version=$HDP_VER --jars \
-/usr/hdp/2.3.0.0-1754/phoenix/phoenix-4.4.0.2.3.0.0-1754-client.jar 
+/usr/hdp/2.2.4.2-2/hbase/lib/hbase-protocol.jar,/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar 
 
-#HDP 2.3 local mode
 
-/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell  --driver-memory 512m --executor-memory 512m --conf hdp.version=$HDP_VER --jars \
-/usr/hdp/2.3.0.0-1754/phoenix/phoenix-4.4.0.2.3.0.0-1754-client.jar 
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --conf hdp.version=$HDP_VER  --jars \
+/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar 
+
+#HDP 2.2.4 yarn-local mode
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --driver-memory 512m --executor-memory 512m --conf hdp.version=$HDP_VER --jars \
+/usr/hdp/2.2.4.2-2/hbase/lib/hbase-protocol.jar,/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar 
 
 
 ```
@@ -159,12 +165,14 @@ export SPARK_CLASSPATH=/etc/hbase/conf:/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-pro
 /root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars \
 /usr/hdp/2.3.0.0-1754/phoenix/lib/phoenix-spark-4.4.0.2.3.0.0-1754.jar,/usr/hdp/2.3.0.0-1754/phoenix/lib/hbase-client.jar --conf hdp.version=$HDP_VER 
 
-#HDP 2.2.4
-/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars /root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar --conf hdp.version=$HDP_VER 
-/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars /usr/hdp/2.2.4.2-2/hbase/lib/hbase-protocol.jar,/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar --conf hdp.version=$HDP_VER
 
-#extract tgz from /root/phoenix under /usr before this
-/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars /usr/phoenix-4.4.0-HBase-0.98-SNAPSHOT/lib/hbase-protocol-0.98.12-hadoop2.jar,/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar --conf hdp.version=$HDP_VER
+#HDP 2.2.4 yarn-client mode using phoenix 4.4
+cp /root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT.tar.gz /usr
+cd /usr
+tar -zxvf phoenix-4.4.0-HBase-0.98-SNAPSHOT.tar.gz
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --conf hdp.version=$HDP_VER --jars \
+/usr/phoenix-4.4.0-HBase-0.98-SNAPSHOT/lib/hbase-protocol-0.98.12-hadoop2.jar,/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar 
+
 ```
 
 
@@ -180,10 +188,10 @@ val rdd: RDD[Map[String, AnyRef]] = sc.phoenixTableAsRDD(
 )
 rdd.count()
 
-//val rdd: RDD[Map[String, AnyRef]] = sc.phoenixTableAsRDD(
-//  "PRICES", Seq("TIME", "SYMBOL"), zkUrl = Some("localhost:2181:/hbase-unsecure")
-//)
-//rdd.count()
+val rdd: RDD[Map[String, AnyRef]] = sc.phoenixTableAsRDD(
+  "PRICES", Seq("TIME", "SYMBOL"), zkUrl = Some("localhost:2181:/hbase-unsecure")
+)
+rdd.count()
 
 
 //val rdd: RDD[Map[String, AnyRef]] = sc.phoenixTableAsRDD(
@@ -198,33 +206,9 @@ rdd.count()
 res14: Long = 5760
 ```
 
-- Error seen on HDP 2.3 in spark yarn-client mode (with spark 1.3.1):
+- Error seen in both spark local and yarn-client mode (with spark 1.3.1):
 ```
-2015-04-28 18:27:49,864 WARN  [task-result-getter-0] scheduler.TaskSetManager: Lost task 0.0 in stage 0.0 (TID 0, sandbox.hortonworks.com): java.lang.RuntimeException: java.sql.SQLException: No suitable driver found for jdbc:phoenix:sandbox.hortonworks.com
-	at org.apache.phoenix.mapreduce.PhoenixInputFormat.getQueryPlan(PhoenixInputFormat.java:123)
-	at org.apache.phoenix.mapreduce.PhoenixInputFormat.createRecordReader(PhoenixInputFormat.java:67)
-	at org.apache.spark.rdd.NewHadoopRDD$$anon$1.<init>(NewHadoopRDD.scala:131)
-	at org.apache.spark.rdd.NewHadoopRDD.compute(NewHadoopRDD.scala:104)
-	at org.apache.spark.rdd.NewHadoopRDD.compute(NewHadoopRDD.scala:66)
-	at org.apache.phoenix.spark.PhoenixRDD.compute(PhoenixRDD.scala:52)
-	at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:277)
-	at org.apache.spark.rdd.RDD.iterator(RDD.scala:244)
-	at org.apache.spark.rdd.MapPartitionsRDD.compute(MapPartitionsRDD.scala:35)
-	at org.apache.spark.rdd.RDD.computeOrReadCheckpoint(RDD.scala:277)
-	at org.apache.spark.rdd.RDD.iterator(RDD.scala:244)
-	at org.apache.spark.scheduler.ResultTask.runTask(ResultTask.scala:61)
-	at org.apache.spark.scheduler.Task.run(Task.scala:64)
-	at org.apache.spark.executor.Executor$TaskRunner.run(Executor.scala:203)
-	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
-	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
-	at java.lang.Thread.run(Thread.java:745)
-Caused by: java.sql.SQLException: No suitable driver found for jdbc:phoenix:sandbox.hortonworks.com
-	at java.sql.DriverManager.getConnection(DriverManager.java:689)
-	at java.sql.DriverManager.getConnection(DriverManager.java:208)
-	at org.apache.phoenix.mapreduce.util.ConnectionUtil.getConnection(ConnectionUtil.java:91)
-	at org.apache.phoenix.mapreduce.util.ConnectionUtil.getInputConnection(ConnectionUtil.java:56)
-	at org.apache.phoenix.mapreduce.PhoenixInputFormat.getQueryPlan(PhoenixInputFormat.java:110)
-	... 16 more
+Caused by: java.sql.SQLException: ERROR 2006 (INT08): Incompatible jars detected between client and server. Ensure that phoenix.jar is put on the classpath of HBase in every region server: org.apache.hadoop.hbase.protobuf.generated.ZooKeeperProtos$MetaRegionServer.hasState()Z
 
 ```
 
