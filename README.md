@@ -48,14 +48,17 @@ mvn package -DskipTests
 
 - Download spark 1.3.1
 ```
+export HDP_VER=`hdp-select status hadoop-client | sed 's/hadoop-client - \(.*\)/\1/'`
+echo "export HDP_VER=$HDP_VER" >> ~/.bashrc
+
 wget http://d3kbcqa49mib13.cloudfront.net/spark-1.3.1-bin-hadoop2.6.tgz
 tar -xzvf spark-1.3.1-bin-hadoop2.6.tgz
-echo "spark.driver.extraJavaOptions -Dhdp.version=2.2.0.0-2041" >> spark-1.3.1-bin-hadoop2.6/conf/spark-defaults.conf
-echo "spark.yarn.am.extraJavaOptions -Dhdp.version=2.2.0.0-2041" >> spark-1.3.1-bin-hadoop2.6/conf/spark-defaults.conf
+echo "spark.driver.extraJavaOptions -Dhdp.version=$HDP_VER" >> spark-1.3.1-bin-hadoop2.6/conf/spark-defaults.conf
+echo "spark.yarn.am.extraJavaOptions -Dhdp.version=$HDP_VER" >> spark-1.3.1-bin-hadoop2.6/conf/spark-defaults.conf
 #copy hbase-site.xml
 cp /etc/hbase/conf/hbase-site.xml spark-1.3.1-bin-hadoop2.6/conf/
 export YARN_CONF_DIR=/etc/hadoop/conf
-echo "export YARN_CONF_DIR=/etc/hadoop/conf" >> ~/.bashrc
+echo "export YARN_CONF_DIR=$YARN_CONF_DIR" >> ~/.bashrc
 ```
 
 - Other
@@ -86,30 +89,33 @@ python google_intraday.py > prices.csv
 - Create sql file to create phoenix table
 ```
 vi ~/prices.sql
+drop table if exists PRICES;
 drop table if exists prices;
 
-create table prices (
- symbol varchar(10),
- date   varchar(10),
- time varchar(10),
- open varchar(10),
- high varchar(10),
- low     varchar(10),
- close     varchar(10),
- volume varchar(30),
- CONSTRAINT pk PRIMARY KEY (volume)
+create table PRICES (
+ SYMBOL varchar(10),
+ DATE   varchar(10),
+ TIME varchar(10),
+ OPEN varchar(10),
+ HIGH varchar(10),
+ LOW    varchar(10),
+ CLOSE     varchar(10),
+ VOLUME varchar(30),
+ CONSTRAINT pk PRIMARY KEY (VOLUME)
 );
 ```
 
 - Create phoenix table and populate with csv data
 ```
-/usr/hdp/2.2.4.2-2/phoenix/bin/psql.py sandbox.hortonworks.com:2181:/hbase-unsecure ~/prices.sql ~/prices.csv
+/usr/hdp/2*/phoenix/bin/psql.py sandbox.hortonworks.com:2181:/hbase-unsecure ~/prices.sql ~/prices.csv
 ```
 
 - Connect to hbase via phoenix
 ```
-/root/phoenix/bin/sqlline.py sandbox.hortonworks.com:2181:/hbase-unsecure
-/usr/hdp/2.2.4.2-2/phoenix/bin/sqlline.py sandbox.hortonworks.com:2181:/hbase-unsecure
+/usr/hdp/*/phoenix/bin/sqlline.py sandbox.hortonworks.com:2181:/hbase-unsecure
+
+#/root/phoenix/bin/sqlline.py sandbox.hortonworks.com:2181:/hbase-unsecure
+
 ```
 
 - Run sample query
@@ -118,9 +124,133 @@ select * from prices order by DATE, TIME limit 20;
 !q
 ```
 
+
+------------------
+
+#### Try examples from phoenix-spark 
+- Try examples from https://github.com/apache/phoenix/tree/master/phoenix-spark
+
+- Start spark shell
+
+```
+unset HADOOP_CLASSPATH
+export SPARK_CLASSPATH=/etc/hbase/conf:/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-protocol.jar
+
+#start spark shell in yarn-client mode and pass in phoenix-spark and phoenix-assembly jars to classpath
+#HDP 2.3
+
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --conf hdp.version=$HDP_VER --jars \
+/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-protocol.jar,/usr/hdp/2.3.0.0-1754/phoenix/lib/phoenix-spark-4.4.0.2.3.0.0-1754.jar,/usr/hdp/2.3.0.0-1754/phoenix/phoenix-4.4.0.2.3.0.0-1754-client.jar 
+
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --conf hdp.version=$HDP_VER --jars \
+/usr/hdp/2.3.0.0-1754/phoenix/phoenix-4.4.0.2.3.0.0-1754-client.jar 
+
+
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars \
+/usr/hdp/2.3.0.0-1754/phoenix/lib/phoenix-spark-4.4.0.2.3.0.0-1754.jar,/usr/hdp/2.3.0.0-1754/phoenix/lib/hbase-client.jar --conf hdp.version=$HDP_VER 
+
+#HDP 2.2.4
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars /root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar --conf hdp.version=$HDP_VER 
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars /usr/hdp/2.2.4.2-2/hbase/lib/hbase-protocol.jar,/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar --conf hdp.version=$HDP_VER
+
+#extract tgz from /root/phoenix under /usr before this
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars /usr/phoenix-4.4.0-HBase-0.98-SNAPSHOT/lib/hbase-protocol-0.98.12-hadoop2.jar,/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar --conf hdp.version=$HDP_VER
+```
+
+
+
+- Load as an RDD, using a Zookeeper URL
+```
+import org.apache.phoenix.spark._ 
+import org.apache.spark.rdd.RDD
+val sqlCtx = new org.apache.spark.sql.SQLContext(sc)
+
+val rdd: RDD[Map[String, AnyRef]] = sc.phoenixTableAsRDD(
+  "PRICES", Seq("TIME", "SYMBOL")
+)
+rdd.count()
+
+val rdd: RDD[Map[String, AnyRef]] = sc.phoenixTableAsRDD(
+  "PRICES", Seq("TIME", "SYMBOL"), zkUrl = Some("localhost:2181:/hbase-unsecure")
+)
+rdd.count()
+
+
+val rdd: RDD[Map[String, AnyRef]] = sc.phoenixTableAsRDD(
+  "PRICES", Seq("TIME", "SYMBOL"), zkUrl = Some("localhost:2181")
+)
+rdd.count()
+```
+
+- **works in spark local mode:**
+```
+res14: Long = 5760
+```
+
+- Error seen in spark yarn-client mode:
+```
+ERROR 2007 (INT09): Outdated jars. The following servers require an updated phoenix.jar to be put in the classpath of HBase: region=SYSTEM.CATALOG,,1430178920971.4f1ee8c72ac509956f0c4923dca5d8b7., hostname=sandbox.hortonworks.com,60020,1430178872563, seqNum=5
+
+Caused by: java.sql.SQLException: ERROR 2006 (INT08): Incompatible jars detected between client and server. Ensure that phoenix.jar is put on the classpath of HBase in every region server: org.apache.hadoop.hbase.protobuf.generated.ZooKeeperProtos$MetaRegionServer.hasState()Z
+
+
+```
+
+
+
 --------------------
 
-#### Try simplymeasured example
+#### OPTIONAL: other examples
+
+- 1: Load table as a DataFrame using the Data Source API
+```
+import org.apache.spark.SparkContext
+import org.apache.spark.sql.SQLContext
+import org.apache.phoenix.spark._
+
+val sqlCtx = new org.apache.spark.sql.SQLContext(sc)
+
+val df = sqlContext.load(
+  "org.apache.phoenix.spark", 
+  Map("table" -> "PRICES", "zkUrl" -> "sandbox.hortonworks.com:2181")
+)
+```
+
+- Error seen in spark local mode:
+```
+[main] mapreduce.PhoenixInputFormat: UseSelectColumns=true, selectColumns=TIME,SYMBOL, selectColumnSet.size()=2, parsedColumns=TIME,SYMBOL
+org.apache.phoenix.schema.TableNotFoundException: ERROR 1012 (42M03): Table undefined. tableName="PRICES"
+```
+- Error seen in spark yarn-client mode:
+```
+ ERROR 2007 (INT09): Outdated jars. The following servers require an updated phoenix.jar to be put in the classpath of HBase: region=SYSTEM.CATALOG,,1430178920971.4f1ee8c72ac509956f0c4923dca5d8b7., hostname=sandbox.hortonworks.com,60020,1430178872563, seqNum=5
+```
+
+- 2: Load table as a DataFrame directly using a Configuration object
+```
+import org.apache.hadoop.conf.Configuration
+import org.apache.spark.SparkContext
+import org.apache.spark.sql.SQLContext
+import org.apache.phoenix.spark._
+
+val sqlCtx = new org.apache.spark.sql.SQLContext(sc)
+
+val configuration = new Configuration()
+val df = sqlContext.phoenixTableAsDataFrame(
+  "PRICES", Array("TIME", "SYMBOL"), conf = configuration
+)
+```
+- Error seen in spark local mode:
+```
+[main] mapreduce.PhoenixInputFormat: UseSelectColumns=true, selectColumns=TIME,SYMBOL, selectColumnSet.size()=2, parsedColumns=TIME,SYMBOL
+org.apache.phoenix.schema.TableNotFoundException: ERROR 1012 (42M03): Table undefined. tableName="PRICES"
+```
+- Error seen in spark yarn-client mode:
+```
+ERROR 2007 (INT09): Outdated jars. The following servers require an updated phoenix.jar to be put in the classpath of HBase: region=SYSTEM.CATALOG,,1430178920971.4f1ee8c72ac509956f0c4923dca5d8b7., hostname=sandbox.hortonworks.com,60020,1430178872563, seqNum=5
+```
+
+#### OPTIONAL: Try simplymeasured example
 
 - Try examples from https://github.com/simplymeasured/phoenix-spark
 
@@ -144,76 +274,7 @@ ERROR PhoenixInputFormat: Failed to get the query plan with error [null]
 java.lang.RuntimeException: java.lang.NullPointerException
 ```
 
-------------------
-
-#### Try examples from phoenix-spark 
-- Try examples from https://github.com/apache/phoenix/tree/master/phoenix-spark
-
-- 1: Load table as a DataFrame using the Data Source API
-```
-#start spark shell in yarn-client mode and pass in phoenix-spark and phoenix-assembly jars to classpath
-/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars /root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar --conf hdp.version=2.2.4.2-2 
-/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars /usr/hdp/2.2.4.2-2/hbase/lib/hbase-protocol.jar,/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar --conf hdp.version=2.2.4.2-2
-
-#extract tgz from /root/phoenix under /usr before this
-/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars /usr/phoenix-4.4.0-HBase-0.98-SNAPSHOT/lib/hbase-protocol-0.98.12-hadoop2.jar,/root/phoenix/phoenix-spark/target/phoenix-spark-4.4.0-HBase-0.98-SNAPSHOT.jar,/root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar --conf hdp.version=2.2.4.2-2
-
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.SQLContext
-import org.apache.phoenix.spark._
-
-val sqlCtx = new org.apache.spark.sql.SQLContext(sc)
-
-val df = sqlContext.load(
-  "org.apache.phoenix.spark", 
-  Map("table" -> "prices", "zkUrl" -> "sandbox.hortonworks.com:2181")
-)
-```
-
-- Error seen:
-```
- ERROR 2007 (INT09): Outdated jars. The following servers require an updated phoenix.jar to be put in the classpath of HBase: region=SYSTEM.CATALOG,,1430178920971.4f1ee8c72ac509956f0c4923dca5d8b7., hostname=sandbox.hortonworks.com,60020,1430178872563, seqNum=5
-```
-
-- 2: Load table as a DataFrame directly using a Configuration object
-```
-import org.apache.hadoop.conf.Configuration
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.SQLContext
-import org.apache.phoenix.spark._
-
-val sqlCtx = new org.apache.spark.sql.SQLContext(sc)
-
-val configuration = new Configuration()
-val df = sqlContext.phoenixTableAsDataFrame(
-  "prices", Array("ID", "symbol"), conf = configuration
-)
-```
-- Error seen:
-```
-ERROR 2007 (INT09): Outdated jars. The following servers require an updated phoenix.jar to be put in the classpath of HBase: region=SYSTEM.CATALOG,,1430178920971.4f1ee8c72ac509956f0c4923dca5d8b7., hostname=sandbox.hortonworks.com,60020,1430178872563, seqNum=5
-```
-
-- 3: Load as an RDD, using a Zookeeper URL
-```
-import org.apache.phoenix.spark._ 
-import org.apache.spark.rdd.RDD
-val sqlCtx = new org.apache.spark.sql.SQLContext(sc)
-
-val rdd: RDD[Map[String, AnyRef]] = sc.phoenixTableAsRDD(
-  "prices", Seq("ID", "symbol"), zkUrl = Some("localhost:2181")
-)
-rdd.count()
-```
-
-- Error seen:
-```
-ERROR 2007 (INT09): Outdated jars. The following servers require an updated phoenix.jar to be put in the classpath of HBase: region=SYSTEM.CATALOG,,1430178920971.4f1ee8c72ac509956f0c4923dca5d8b7., hostname=sandbox.hortonworks.com,60020,1430178872563, seqNum=5
-
-Caused by: java.sql.SQLException: ERROR 2006 (INT08): Incompatible jars detected between client and server. Ensure that phoenix.jar is put on the classpath of HBase in every region server: org.apache.hadoop.hbase.protobuf.generated.ZooKeeperProtos$MetaRegionServer.hasState()Z
-
-
-```
+----------------
 
 #### Run through Zeppelin
 
