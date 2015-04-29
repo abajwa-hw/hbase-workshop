@@ -201,12 +201,8 @@ rdd.count()
 
 ```
 
-- **works in spark local mode:**
-```
-res14: Long = 5760
-```
 
-- Error seen in both spark local and yarn-client mode (with spark 1.3.1):
+- Error seen in *both spark local and yarn-client mode* (with spark 1.3.1):
 ```
 Caused by: java.sql.SQLException: ERROR 2006 (INT08): Incompatible jars detected between client and server. Ensure that phoenix.jar is put on the classpath of HBase in every region server: org.apache.hadoop.hbase.protobuf.generated.ZooKeeperProtos$MetaRegionServer.hasState()Z
 
