@@ -67,7 +67,7 @@ cp /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar /usr/hdp/2.2.4.2-2//phoenix/ph
 cp /root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar
 cp /root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-server.jar /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar
 ```
--Restart Hbase
+- Restart Hbase
 
 #### Setup Phoenix table and import data
 
