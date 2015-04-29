@@ -218,7 +218,7 @@ export SPARK_CLASSPATH=/etc/hbase/conf:/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-pro
 - Run same examples as above
 
 - Error seen
-  - My guess is that SPARK_CLASSPATH (see above) is not getting propagated to zeppelin
+  - My guess is that SPARK_CLASSPATH (set in zeppelin-env.sh above) is not getting propagated to zeppelin
 ![Image](../master/screenshots/zep-error-local.png?raw=true)
 
 #### Useful commands
