@@ -216,7 +216,7 @@ org.apache.phoenix.schema.TableNotFoundException: ERROR 1012 (42M03): Table unde
 export JAVA_HOME=/usr/lib/jvm/java-1.7.0-openjdk.x86_64
 export SPARK_YARN_JAR=hdfs:///tmp/.zeppelin/zeppelin-spark-0.5.0-SNAPSHOT.jar
 export MASTER=
-export SPARK_HOME=/usr/hdp/current/spark-client/
+export SPARK_HOME=/root/spark-1.3.1-bin-hadoop2.6
 export HADOOP_CONF_DIR=/etc/hadoop/conf
 export ZEPPELIN_PID_DIR=/var/run/zeppelin-notebook
 export ZEPPELIN_JAVA_OPTS="-Dhdp.version=2.3.0.0-1754 -Dspark.files=/etc/hbase/conf/hbase-site.xml -Dspark.jars=/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-protocol.jar"
