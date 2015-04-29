@@ -38,7 +38,7 @@ git checkout 4.x-HBase-0.98
 mvn package -DskipTests -Dhadoop.profile=2
 ```
 
-- NOT NEEDED ~Compile simplymeasured phoenix-spark~
+- NOT NEEDED ~~Compile simplymeasured phoenix-spark~~
 ```
 cd
 rm -rf phoenix-spark
@@ -62,7 +62,7 @@ export YARN_CONF_DIR=/etc/hadoop/conf
 echo "export YARN_CONF_DIR=$YARN_CONF_DIR" >> ~/.bashrc
 ```
 
-- NOT NEEDED ~Other setup steps~ 
+- NOT NEEDED ~~Other setup steps~~
 ```
 cp /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar.origali
 #cp /root/phoenix/phoenix-assembly/target/phoenix-4.4.0-HBase-0.98-SNAPSHOT-client.jar /usr/hdp/2.2.4.2-2//phoenix/phoenix-server.jar
