@@ -150,7 +150,7 @@ Caused by: java.sql.SQLException: No suitable driver found for jdbc:phoenix:sand
 
 --------------------
 
-#### OPTIONAL: other examples
+#### Other examples
 
 - 1: Load table as a DataFrame using the Data Source API
 ```
