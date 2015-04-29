@@ -2,6 +2,7 @@
 
 #### Env setup on HDP 2.3.0.0-1754
 
+- Setup a VM running HDP 2.3/Ambari 2.1 build 233 using [this repo file](http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.1.0-244/ambaribn.repo)
 
 - Download spark 1.3.1
 ```
