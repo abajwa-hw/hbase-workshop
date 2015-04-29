@@ -75,7 +75,7 @@ select * from prices order by DATE, TIME limit 20;
 ------------------
 
 #### Try examples from phoenix-spark 
-- Try examples from https://github.com/apache/phoenix/tree/master/phoenix-spark
+- Try examples from https://github.com/apache/phoenix/tree/master/phoenix-spark using both spark local mode and yarn-client mode
 
 - Start spark shell
 
@@ -98,7 +98,6 @@ export SPARK_CLASSPATH=/etc/hbase/conf:/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-pro
 ```
 
 
-
 - Load as an RDD, using a Zookeeper URL
 ```
 import org.apache.phoenix.spark._ 
@@ -106,20 +105,9 @@ import org.apache.spark.rdd.RDD
 val sqlCtx = new org.apache.spark.sql.SQLContext(sc)
 
 val rdd: RDD[Map[String, AnyRef]] = sc.phoenixTableAsRDD(
-  "PRICES", Seq("TIME", "SYMBOL")
+  "PRICES", Seq("TIME", "SYMBOL"), zkUrl = Some("localhost:2181:/hbase-unsecure")
 )
 rdd.count()
-
-//val rdd: RDD[Map[String, AnyRef]] = sc.phoenixTableAsRDD(
-//  "PRICES", Seq("TIME", "SYMBOL"), zkUrl = Some("localhost:2181:/hbase-unsecure")
-//)
-//rdd.count()
-
-
-//val rdd: RDD[Map[String, AnyRef]] = sc.phoenixTableAsRDD(
-//  "PRICES", Seq("TIME", "SYMBOL"), zkUrl = Some("localhost:2181")
-//)
-//rdd.count()
 
 ```
 
