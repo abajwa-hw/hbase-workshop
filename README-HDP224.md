@@ -262,7 +262,7 @@ org.apache.phoenix.schema.TableNotFoundException: ERROR 1012 (42M03): Table unde
 ERROR 2007 (INT09): Outdated jars. The following servers require an updated phoenix.jar to be put in the classpath of HBase: region=SYSTEM.CATALOG,,1430178920971.4f1ee8c72ac509956f0c4923dca5d8b7., hostname=sandbox.hortonworks.com,60020,1430178872563, seqNum=5
 ```
 
-#### OPTIONAL: Try simplymeasured example
+#### OPTIONAL: ~~Try simplymeasured example~~
 
 - Try examples from https://github.com/simplymeasured/phoenix-spark
 
