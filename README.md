@@ -136,15 +136,24 @@ select * from prices order by DATE, TIME limit 20;
 unset HADOOP_CLASSPATH
 export SPARK_CLASSPATH=/etc/hbase/conf:/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-protocol.jar
 
-#start spark shell in yarn-client mode and pass in phoenix-spark and phoenix-assembly jars to classpath
-#HDP 2.3
-
-/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --conf hdp.version=$HDP_VER --jars \
-/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-protocol.jar,/usr/hdp/2.3.0.0-1754/phoenix/lib/phoenix-spark-4.4.0.2.3.0.0-1754.jar,/usr/hdp/2.3.0.0-1754/phoenix/phoenix-4.4.0.2.3.0.0-1754-client.jar 
+#start spark shell and pass in relevant jars to classpath
+#HDP 2.3 yarn-client mode
 
 /root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --conf hdp.version=$HDP_VER --jars \
 /usr/hdp/2.3.0.0-1754/phoenix/phoenix-4.4.0.2.3.0.0-1754-client.jar 
 
+#HDP 2.3 local mode
+
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell  --driver-memory 512m --executor-memory 512m --conf hdp.version=$HDP_VER --jars \
+/usr/hdp/2.3.0.0-1754/phoenix/phoenix-4.4.0.2.3.0.0-1754-client.jar 
+
+
+```
+
+- Previous runs - ignore these
+```
+/root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --conf hdp.version=$HDP_VER --jars \
+/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-protocol.jar,/usr/hdp/2.3.0.0-1754/phoenix/lib/phoenix-spark-4.4.0.2.3.0.0-1754.jar,/usr/hdp/2.3.0.0-1754/phoenix/phoenix-4.4.0.2.3.0.0-1754-client.jar 
 
 /root/spark-1.3.1-bin-hadoop2.6/bin/spark-shell --master yarn-client --driver-memory 512m --executor-memory 512m --jars \
 /usr/hdp/2.3.0.0-1754/phoenix/lib/phoenix-spark-4.4.0.2.3.0.0-1754.jar,/usr/hdp/2.3.0.0-1754/phoenix/lib/hbase-client.jar --conf hdp.version=$HDP_VER 
