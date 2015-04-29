@@ -219,9 +219,9 @@ export MASTER=
 export SPARK_HOME=/root/spark-1.3.1-bin-hadoop2.6
 export HADOOP_CONF_DIR=/etc/hadoop/conf
 export ZEPPELIN_PID_DIR=/var/run/zeppelin-notebook
-export ZEPPELIN_JAVA_OPTS="-Dhdp.version=2.3.0.0-1754 -Dspark.files=/etc/hbase/conf/hbase-site.xml -Dspark.jars=/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-protocol.jar"
+export ZEPPELIN_JAVA_OPTS="-Dhdp.version=2.3.0.0-1754 -Dspark.files=/etc/hbase/conf/hbase-site.xml -Dspark.jars=/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-protocol.jar,/usr/hdp/2.3.0.0-1754/phoenix/phoenix-4.4.0.2.3.0.0-1754-client.jar,/root/spark-1.3.1-bin-hadoop2.6/lib/spark-assembly-1.3.1-hadoop2.6.0.jar"
 export ZEPPELIN_LOG_DIR=/var/log/zeppelin
-export SPARK_CLASSPATH=/etc/hbase/conf:/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-protocol.jar
+export SPARK_CLASSPATH=/etc/hbase/conf:/usr/hdp/2.3.0.0-1754/hbase/lib/hbase-protocol.jar:/usr/hdp/2.3.0.0-1754/phoenix/phoenix-4.4.0.2.3.0.0-1754-client.jar
 ```
 
 - Set Interpreter settings as below
