@@ -114,6 +114,13 @@ rdd.first()
 val firstSymbol = rdd.first()("SYMBOL").asInstanceOf[String]
 val firstVolume = rdd.first()("VOLUME").asInstanceOf[String]
 
+
+#Not working yet
+import sqlCtx.implicits._
+case class Stocks(volume: String, close: String, symbol: String, high: String, date: String, low: String, open: String, time:String)
+val stocks = rdd.map(s => Stocks( s(0), s(1), s(2), s(3), s(4), s(5), s(6), s(7))).toDF()
+
+
 ```
 
 - **works in spark local mode:**
@@ -188,7 +195,7 @@ import org.apache.phoenix.spark._
 val sqlCtx = new org.apache.spark.sql.SQLContext(sc)
 
 val configuration = new Configuration()
-val df = sqlContext.phoenixTableAsDataFrame(
+val df = sqlCtx.phoenixTableAsDataFrame(
   "PRICES", Array("TIME", "SYMBOL"), conf = configuration
 )
 ```
