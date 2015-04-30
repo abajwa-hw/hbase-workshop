@@ -107,9 +107,12 @@ import org.apache.spark.rdd.RDD
 val sqlCtx = new org.apache.spark.sql.SQLContext(sc)
 
 val rdd: RDD[Map[String, AnyRef]] = sc.phoenixTableAsRDD(
-  "PRICES", Seq("TIME", "SYMBOL"), zkUrl = Some("localhost:2181:/hbase-unsecure")
+  "PRICES", Seq("SYMBOL","DATE","TIME", "OPEN","HIGH","LOW","CLOSE","VOLUME"), zkUrl = Some("localhost:2181:/hbase-unsecure")
 )
 rdd.count()
+rdd.first()
+val firstSymbol = rdd.first()("SYMBOL").asInstanceOf[String]
+val firstVolume = rdd.first()("VOLUME").asInstanceOf[String]
 
 ```
 
@@ -164,7 +167,7 @@ val sqlCtx = new org.apache.spark.sql.SQLContext(sc)
 
 val df = sqlContext.load(
   "org.apache.phoenix.spark", 
-  Map("table" -> "PRICES", "zkUrl" -> "sandbox.hortonworks.com:2181")
+  Map("table" -> "PRICES", "zkUrl" -> "localhost:2181:/hbase-unsecure")
 )
 ```
 
